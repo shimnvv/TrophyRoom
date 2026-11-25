@@ -3,20 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Completion Tracker</title>
+  <title>TrophyRoom</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg: #0e1013;
-      --surface: #15181e;
-      --surface-hover: #1b1f27;
-      --border: rgba(255, 255, 255, 0.08);
+      --bg: #0c0e12;
+      --surface: #14171d;
+      --surface-elevated: #191d25;
+      --border: rgba(255, 255, 255, 0.07);
       --border-strong: rgba(255, 255, 255, 0.14);
-      --text: #eef1f5;
-      --text-muted: #8b93a1;
-      --accent: #e5b567;
-      --accent-bg: rgba(229, 181, 103, 0.10);
-      --accent-border: rgba(229, 181, 103, 0.28);
+      --text: #edf0f5;
+      --text-muted: #868e9c;
+      --gold: #e2b464;
+      --gold-bg: rgba(226, 180, 100, 0.09);
+      --gold-border: rgba(226, 180, 100, 0.25);
+      --platinum: #8ab4f8;
+      --platinum-bg: rgba(138, 180, 248, 0.09);
+      --platinum-border: rgba(138, 180, 248, 0.25);
       --danger: #e06c75;
     }
 
@@ -27,16 +30,22 @@
 
     body {
       margin: 0;
-      padding: 16px 14px 36px;
+      padding: 14px 14px 86px;
       font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
       line-height: 1.45;
     }
 
-    .app {
+    .container {
       max-width: 540px;
       margin: 0 auto;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
     .card {
@@ -46,18 +55,12 @@
       padding: 16px;
     }
 
-    .stack {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    h1, h2, p {
+    h1, h2, h3, p {
       margin: 0;
     }
 
-    .title {
-      font-size: 17px;
+    .section-title {
+      font-size: 15px;
       font-weight: 600;
       letter-spacing: -0.01em;
     }
@@ -69,37 +72,29 @@
 
     .input {
       width: 100%;
-      margin-top: 12px;
       padding: 11px 13px;
       font-size: 14px;
       color: var(--text);
-      background: #101216;
+      background: #0f1116;
       border: 1px solid var(--border-strong);
       border-radius: 10px;
       outline: none;
-      transition: border-color 0.15s ease;
     }
 
     .input:focus {
-      border-color: rgba(238, 241, 245, 0.35);
+      border-color: rgba(237, 240, 245, 0.35);
     }
 
     .btn-primary {
       width: 100%;
-      margin-top: 10px;
       padding: 11px 14px;
       font-size: 14px;
       font-weight: 600;
-      color: #111317;
+      color: #101216;
       background: var(--text);
       border: none;
       border-radius: 10px;
       cursor: pointer;
-      transition: opacity 0.15s ease;
-    }
-
-    .btn-primary:hover {
-      opacity: 0.92;
     }
 
     .btn-primary:disabled {
@@ -116,7 +111,6 @@
       border: 1px solid var(--border);
       border-radius: 8px;
       cursor: pointer;
-      transition: color 0.15s ease, border-color 0.15s ease;
     }
 
     .btn-ghost:hover {
@@ -124,10 +118,11 @@
       border-color: var(--border-strong);
     }
 
-    .profile-top {
+    /* Профиль */
+    .profile-header {
       display: flex;
       align-items: center;
-      gap: 13px;
+      gap: 12px;
     }
 
     .avatar {
@@ -135,12 +130,12 @@
       height: 54px;
       border-radius: 12px;
       object-fit: cover;
-      background: #1e222a;
+      background: #1d212a;
       border: 1px solid var(--border);
       flex-shrink: 0;
     }
 
-    .profile-meta {
+    .profile-info {
       flex: 1;
       min-width: 0;
     }
@@ -153,82 +148,104 @@
       text-overflow: ellipsis;
     }
 
-    .profile-id {
+    .profile-sub {
       font-size: 12px;
       color: var(--text-muted);
       margin-top: 2px;
-      font-variant-numeric: tabular-nums;
     }
 
-    .stats {
+    .profile-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* Главные кнопки-счетчики */
+    .main-stats {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
 
-    .stat-tile {
+    .stat-card {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
       gap: 4px;
       padding: 15px;
-      text-align: left;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 14px;
       color: var(--text);
+      text-align: left;
       cursor: pointer;
       transition: background 0.15s ease, border-color 0.15s ease;
     }
 
-    .stat-tile:hover {
-      background: var(--surface-hover);
+    .stat-card:hover {
+      background: var(--surface-elevated);
       border-color: var(--border-strong);
     }
 
-    .stat-tile.active {
-      border-color: rgba(238, 241, 245, 0.32);
+    .stat-card.active {
+      border-color: rgba(237, 240, 245, 0.35);
     }
 
-    .stat-tile.gold {
-      background: var(--accent-bg);
-      border-color: var(--accent-border);
+    .stat-card.gold {
+      background: var(--gold-bg);
+      border-color: var(--gold-border);
     }
 
-    .stat-tile.gold:hover {
-      border-color: rgba(229, 181, 103, 0.45);
+    .stat-card.gold .stat-num {
+      color: var(--gold);
     }
 
-    .stat-value {
+    .stat-num {
       font-size: 26px;
       font-weight: 700;
       letter-spacing: -0.02em;
       font-variant-numeric: tabular-nums;
     }
 
-    .stat-tile.gold .stat-value {
-      color: var(--accent);
-    }
-
-    .stat-caption {
+    .stat-label {
       font-size: 12.5px;
       color: var(--text-muted);
     }
 
-    .list-bar {
+    /* Вторичная статистика */
+    .sub-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .mini-stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 12px;
+    }
+
+    .mini-val {
+      font-size: 15px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .mini-key {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Список игр */
+    .list-toolbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 2px 2px;
+      gap: 8px;
     }
 
-    .list-title {
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-
-    .game-item {
+    .game-row {
       display: flex;
       align-items: center;
       gap: 11px;
@@ -238,16 +255,16 @@
       border-radius: 12px;
     }
 
-    .game-thumb {
+    .game-icon {
       width: 34px;
       height: 34px;
       border-radius: 7px;
       object-fit: cover;
-      background: #1e222a;
+      background: #1c2028;
       flex-shrink: 0;
     }
 
-    .game-body {
+    .game-meta {
       flex: 1;
       min-width: 0;
     }
@@ -260,88 +277,282 @@
       text-overflow: ellipsis;
     }
 
-    .game-sub {
+    .game-desc {
       font-size: 12px;
       color: var(--text-muted);
       margin-top: 1px;
       font-variant-numeric: tabular-nums;
     }
 
-    .tag-100 {
+    .pill-100 {
       font-size: 11px;
       font-weight: 600;
-      color: var(--accent);
-      background: var(--accent-bg);
-      border: 1px solid var(--accent-border);
+      color: var(--gold);
+      background: var(--gold-bg);
+      border: 1px solid var(--gold-border);
       padding: 3px 7px;
       border-radius: 6px;
       flex-shrink: 0;
     }
 
+    /* Ачивки / Бейджи */
+    .badge-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      opacity: 0.48;
+    }
+
+    .badge-item.unlocked {
+      opacity: 1;
+      border-color: var(--border-strong);
+    }
+
+    .badge-item.unlocked.gold {
+      background: var(--gold-bg);
+      border-color: var(--gold-border);
+    }
+
+    .badge-item.unlocked.platinum {
+      background: var(--platinum-bg);
+      border-color: var(--platinum-border);
+    }
+
+    .badge-status {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .badge-item.unlocked .badge-status {
+      color: var(--text);
+    }
+
+    .badge-item.unlocked.gold .badge-status {
+      color: var(--gold);
+    }
+
+    .badge-item.unlocked.platinum .badge-status {
+      color: var(--platinum);
+    }
+
+    /* Лента / Сообщество */
+    .feed-placeholder {
+      border-style: dashed;
+      border-color: var(--border-strong);
+    }
+
+    .link-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .link-row:hover {
+      background: var(--surface-elevated);
+    }
+
+    /* Нижняя навигация */
+    .tabbar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(12, 14, 18, 0.92);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+      z-index: 20;
+    }
+
+    .tabbar-inner {
+      width: 100%;
+      max-width: 540px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 6px;
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.15s ease, background 0.15s ease;
+    }
+
+    .tab-btn.active {
+      color: var(--text);
+      background: var(--surface-elevated);
+    }
+
     .error {
-      margin-top: 10px;
       font-size: 12.5px;
       color: var(--danger);
     }
 
     .hidden {
-      display: none;
+      display: none !important;
     }
   </style>
 </head>
 <body>
-  <div class="app stack">
-    <!-- Экран привязки -->
-    <section id="linkView" class="card">
-      <h1 class="title">Привязка Steam</h1>
-      <p class="muted" style="margin-top: 5px;">
-        Укажите ссылку на профиль, кастомный ID или SteamID64. В настройках приватности Steam «Игровые детали» должны быть открыты.
-      </p>
+  <div class="container">
+    <!-- Состояние загрузки -->
+    <div id="loadingView" class="card" style="text-align:center; padding: 28px 16px;">
+      <p class="muted">Загрузка профиля...</p>
+    </div>
+
+    <!-- Первичная привязка Steam -->
+    <section id="linkView" class="card stack hidden">
+      <div>
+        <h1 class="section-title" style="font-size: 17px;">Добро пожаловать в TrophyRoom</h1>
+        <p class="muted" style="margin-top: 5px;">
+          Привяжите аккаунт Steam один раз — профиль, статистика и прогресс на 100% сохранятся автоматически.
+        </p>
+      </div>
       <input
         id="steamInput"
         class="input"
         type="text"
-        placeholder="steamcommunity.com/id/... или 7656119..."
+        placeholder="steamcommunity.com/id/... или SteamID64"
       />
-      <button id="linkBtn" class="btn-primary" onclick="linkSteam()">Подключить аккаунт</button>
-      <div id="errorMsg" class="error"></div>
+      <button id="linkBtn" class="btn-primary" onclick="linkSteam()">Привязать Steam</button>
+      <div id="linkError" class="error"></div>
     </section>
 
-    <!-- Экран профиля -->
-    <section id="profileView" class="stack hidden">
-      <div class="card profile-top">
-        <img id="avatar" class="avatar" src="" alt="" />
-        <div class="profile-meta">
-          <div id="personaName" class="profile-name"></div>
-          <div id="steamIdLabel" class="profile-id"></div>
+    <!-- Основное приложение -->
+    <main id="appShell" class="hidden">
+      <!-- ВКЛАДКА 1: ПРОФИЛЬ -->
+      <section id="tab-profile" class="stack">
+        <div class="card profile-header">
+          <img id="avatar" class="avatar" src="" alt="" />
+          <div class="profile-info">
+            <div id="personaName" class="profile-name"></div>
+            <div id="steamIdText" class="profile-sub"></div>
+          </div>
+          <div class="profile-actions">
+            <button id="syncBtn" class="btn-ghost" onclick="syncProfile()">Обновить</button>
+            <button class="btn-ghost" onclick="openRelink()">Сменить</button>
+          </div>
         </div>
-        <button class="btn-ghost" onclick="showLinkView()">Изменить</button>
-      </div>
 
-      <div class="stats">
-        <button id="btnAll" class="stat-tile" onclick="toggleList('all')">
-          <span id="totalCount" class="stat-value">0</span>
-          <span class="stat-caption">Всего игр</span>
-        </button>
-        <button id="btn100" class="stat-tile gold" onclick="toggleList('100')">
-          <span id="completedCount" class="stat-value">0</span>
-          <span class="stat-caption">Игры на 100%</span>
-        </button>
-      </div>
+        <div id="syncError" class="error hidden"></div>
 
-      <div id="listContainer" class="stack hidden">
-        <div class="list-bar">
-          <span id="listTitle" class="list-title"></span>
-          <button class="btn-ghost" onclick="hideList()">Скрыть</button>
+        <!-- Две главные кнопки -->
+        <div class="main-stats">
+          <button id="btnAll" class="stat-card" onclick="toggleGameList('all')">
+            <span id="statTotal" class="stat-num">0</span>
+            <span class="stat-label">Всего игр</span>
+          </button>
+          <button id="btn100" class="stat-card gold" onclick="toggleGameList('100')">
+            <span id="stat100" class="stat-num">0</span>
+            <span class="stat-label">Игры на 100%</span>
+          </button>
         </div>
-        <div id="gamesList" class="stack" style="gap: 8px;"></div>
-      </div>
-    </section>
+
+        <!-- Вторичная статистика -->
+        <div class="sub-stats">
+          <div class="mini-stat">
+            <div id="statHours" class="mini-val">0 ч</div>
+            <div class="mini-key">В играх</div>
+          </div>
+          <div class="mini-stat">
+            <div id="statAch" class="mini-val">0</div>
+            <div class="mini-key">Достижений</div>
+          </div>
+          <div class="mini-stat">
+            <div id="statRate" class="mini-val">0%</div>
+            <div class="mini-key">Зачистка</div>
+          </div>
+        </div>
+
+        <!-- Раскрываемый список игр -->
+        <div id="gamesDrawer" class="stack hidden">
+          <div class="list-toolbar">
+            <span id="drawerTitle" class="section-title"></span>
+            <button class="btn-ghost" onclick="closeGameList()">Скрыть</button>
+          </div>
+          <input
+            id="searchInput"
+            class="input"
+            type="text"
+            placeholder="Поиск по названию игры..."
+            oninput="renderGameRows()"
+          />
+          <div id="gamesList" class="stack" style="gap: 8px;"></div>
+        </div>
+      </section>
+
+      <!-- ВКЛАДКА 2: АЧИВКИ ПРИЛОЖЕНИЯ -->
+      <section id="tab-badges" class="stack hidden">
+        <div class="card">
+          <h2 class="section-title">Достижения TrophyRoom</h2>
+          <p id="badgesSummary" class="muted" style="margin-top: 4px;"></p>
+        </div>
+        <div id="badgesList" class="stack" style="gap: 8px;"></div>
+      </section>
+
+      <!-- ВКЛАДКА 3: ЛЕНТА И СООБЩЕСТВО -->
+      <section id="tab-feed" class="stack hidden">
+        <div class="card feed-placeholder stack" style="gap: 6px;">
+          <h2 class="section-title">Лента гайдов и новостей</h2>
+          <p class="muted">
+            Скоро здесь появятся свежие разборы платин, подборки игр на 100% и новости из основного Telegram-канала.
+          </p>
+        </div>
+
+        <div class="stack" style="gap: 8px;">
+          <a class="link-row" href="https://t.me/" target="_blank" rel="noopener">
+            <span>Telegram-канал с гайдами</span>
+            <span class="muted">Скоро →</span>
+          </a>
+          <a class="link-row" href="https://t.me/" target="_blank" rel="noopener">
+            <span>Чат сообщества</span>
+            <span class="muted">Скоро →</span>
+          </a>
+        </div>
+
+        <div class="card stack" style="gap: 6px;">
+          <h3 class="section-title">Карточка профиля в чате</h3>
+          <p class="muted">
+            Когда подключим бота в общий чат, вы сможете выводить свою статистику из TrophyRoom одной командой прямо в переписку.
+          </p>
+        </div>
+      </section>
+
+      <!-- Нижняя панель навигации -->
+      <nav class="tabbar">
+        <div class="tabbar-inner">
+          <button class="tab-btn active" data-tab="profile" onclick="switchTab('profile')">Профиль</button>
+          <button class="tab-btn" data-tab="badges" onclick="switchTab('badges')">Ачивки</button>
+          <button class="tab-btn" data-tab="feed" onclick="switchTab('feed')">Лента</button>
+        </div>
+      </nav>
+    </main>
   </div>
 
   <script>
-    // Если раздаешь фронт и бэкенд с одного сервера, оставь window.location.origin.
-    // Если фронт отдельно (например, Vercel), укажи сюда URL бэкенда: "https://your-api.onrender.com"
     const API_URL =
       window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
         ? "http://127.0.0.1:8000"
@@ -351,132 +562,200 @@
     if (tg) {
       tg.ready();
       tg.expand();
-      if (tg.setHeaderColor) tg.setHeaderColor("#0e1013");
-      if (tg.setBackgroundColor) tg.setBackgroundColor("#0e1013");
+      if (tg.setHeaderColor) tg.setHeaderColor("#0c0e12");
+      if (tg.setBackgroundColor) tg.setBackgroundColor("#0c0e12");
     }
 
     const tgUserId = tg?.initDataUnsafe?.user?.id || 10001;
-    let currentProfile = null;
-    let activeMode = null;
+    let profile = null;
+    let listMode = null;
 
-    function setError(text) {
-      document.getElementById("errorMsg").textContent = text || "";
+    function switchTab(tabName) {
+      ["profile", "badges", "feed"].forEach((name) => {
+        document.getElementById(`tab-${name}`).classList.toggle("hidden", name !== tabName);
+      });
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.tab === tabName);
+      });
     }
 
-    function showLinkView() {
-      document.getElementById("profileView").classList.add("hidden");
+    function openRelink() {
+      document.getElementById("appShell").classList.add("hidden");
       document.getElementById("linkView").classList.remove("hidden");
-      setError("");
+      document.getElementById("linkError").textContent = "";
     }
 
-    function renderProfile(data) {
-      currentProfile = data;
-      activeMode = null;
-
+    function renderApp(data) {
+      profile = data;
+      document.getElementById("loadingView").classList.add("hidden");
       document.getElementById("linkView").classList.add("hidden");
-      document.getElementById("profileView").classList.remove("hidden");
-      document.getElementById("listContainer").classList.add("hidden");
-      document.getElementById("btnAll").classList.remove("active");
-      document.getElementById("btn100").classList.remove("active");
+      document.getElementById("appShell").classList.remove("hidden");
 
       document.getElementById("avatar").src = data.avatar || "";
       document.getElementById("personaName").textContent = data.persona_name || "Player";
-      document.getElementById("steamIdLabel").textContent = `SteamID · ${data.steam_id}`;
-      document.getElementById("totalCount").textContent = data.total_games_count;
-      document.getElementById("completedCount").textContent = data.completed_100_count;
+      document.getElementById("steamIdText").textContent = `SteamID · ${data.steam_id}`;
+
+      const s = data.stats;
+      document.getElementById("statTotal").textContent = s.total_games_count;
+      document.getElementById("stat100").textContent = s.completed_100_count;
+      document.getElementById("statHours").textContent = `${s.total_hours} ч`;
+      document.getElementById("statAch").textContent = s.total_achievements;
+      document.getElementById("statRate").textContent = `${s.completion_rate}%`;
+
+      renderBadges(data.badges || []);
+      if (listMode) renderGameRows();
     }
 
-    async function linkSteam() {
-      const inputEl = document.getElementById("steamInput");
-      const btnEl = document.getElementById("linkBtn");
-      const steamInput = inputEl.value.trim();
+    function renderBadges(badges) {
+      const unlockedCount = badges.filter((b) => b.unlocked).length;
+      document.getElementById("badgesSummary").textContent =
+        `Открыто ${unlockedCount} из ${badges.length} достижений`;
 
-      setError("");
-      if (!steamInput) {
-        setError("Введите ссылку на профиль или SteamID.");
+      const container = document.getElementById("badgesList");
+      container.innerHTML = "";
+      for (const b of badges) {
+        const el = document.createElement("div");
+        el.className = `badge-item ${b.unlocked ? "unlocked" : ""} ${b.tier || ""}`;
+        el.innerHTML = `
+          <div>
+            <div class="game-name">${b.title}</div>
+            <div class="game-desc">${b.desc}</div>
+          </div>
+          <span class="badge-status">${b.unlocked ? "Получено" : "Закрыто"}</span>
+        `;
+        container.appendChild(el);
+      }
+    }
+
+    function closeGameList() {
+      listMode = null;
+      document.getElementById("gamesDrawer").classList.add("hidden");
+      document.getElementById("btnAll").classList.remove("active");
+      document.getElementById("btn100").classList.remove("active");
+    }
+
+    function toggleGameList(mode) {
+      if (!profile) return;
+      if (listMode === mode) {
+        closeGameList();
+        return;
+      }
+      listMode = mode;
+      document.getElementById("searchInput").value = "";
+      document.getElementById("btnAll").classList.toggle("active", mode === "all");
+      document.getElementById("btn100").classList.toggle("active", mode === "100");
+      document.getElementById("gamesDrawer").classList.remove("hidden");
+      renderGameRows();
+    }
+
+    function renderGameRows() {
+      if (!profile || !listMode) return;
+      const is100 = listMode === "100";
+      const source = is100 ? profile.completed_100_games : profile.all_games;
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+      const filtered = query
+        ? source.filter((g) => g.name.toLowerCase().includes(query))
+        : source;
+
+      document.getElementById("drawerTitle").textContent = is100
+        ? `Игры на 100% · ${filtered.length}`
+        : `Все игры · ${filtered.length}`;
+
+      const listEl = document.getElementById("gamesList");
+      listEl.innerHTML = "";
+
+      if (!filtered.length) {
+        listEl.innerHTML = `<div class="card"><p class="muted">Ничего не найдено.</p></div>`;
         return;
       }
 
-      btnEl.disabled = true;
-      btnEl.textContent = "Загрузка...";
+      for (const g of filtered) {
+        const ach = g.total > 0 ? `${g.unlocked}/${g.total} ачивок` : "Без ачивок";
+        const row = document.createElement("div");
+        row.className = "game-row";
+        row.innerHTML = `
+          <img class="game-icon" src="${g.icon_url}" alt="" onerror="this.style.display='none'" />
+          <div class="game-meta">
+            <div class="game-name">${g.name}</div>
+            <div class="game-desc">${g.playtime_hours} ч · ${ach}</div>
+          </div>
+          ${g.is_100 ? `<span class="pill-100">100%</span>` : ""}
+        `;
+        listEl.appendChild(row);
+      }
+    }
+
+    async function linkSteam() {
+      const input = document.getElementById("steamInput").value.trim();
+      const btn = document.getElementById("linkBtn");
+      const err = document.getElementById("linkError");
+      err.textContent = "";
+
+      if (!input) {
+        err.textContent = "Введите ссылку на профиль Steam или SteamID.";
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Синхронизация...";
 
       try {
         const res = await fetch(`${API_URL}/api/link-steam`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tg_id: tgUserId, steam_input: steamInput }),
+          body: JSON.stringify({ tg_id: tgUserId, steam_input: input }),
         });
         const data = await res.json();
         if (!res.ok) {
-          setError(data.detail || "Не удалось загрузить профиль.");
+          err.textContent = data.detail || "Ошибка привязки.";
           return;
         }
-        renderProfile(data);
+        renderApp(data);
       } catch {
-        setError("Сервер недоступен. Проверьте подключение.");
+        err.textContent = "Не удалось подключиться к серверу.";
       } finally {
-        btnEl.disabled = false;
-        btnEl.textContent = "Подключить аккаунт";
+        btn.disabled = false;
+        btn.textContent = "Привязать Steam";
       }
     }
 
-    function hideList() {
-      activeMode = null;
-      document.getElementById("listContainer").classList.add("hidden");
-      document.getElementById("btnAll").classList.remove("active");
-      document.getElementById("btn100").classList.remove("active");
-    }
+    async function syncProfile() {
+      const btn = document.getElementById("syncBtn");
+      const err = document.getElementById("syncError");
+      err.classList.add("hidden");
+      btn.disabled = true;
+      btn.textContent = "...";
 
-    function toggleList(mode) {
-      if (!currentProfile) return;
-      if (activeMode === mode) {
-        hideList();
-        return;
-      }
-
-      activeMode = mode;
-      const is100 = mode === "100";
-      const items = is100 ? currentProfile.completed_100_games : currentProfile.all_games;
-
-      document.getElementById("btnAll").classList.toggle("active", !is100);
-      document.getElementById("btn100").classList.toggle("active", is100);
-      document.getElementById("listTitle").textContent = is100
-        ? `Игры на 100% · ${items.length}`
-        : `Все игры · ${items.length}`;
-
-      const listEl = document.getElementById("gamesList");
-      listEl.innerHTML = "";
-
-      if (!items.length) {
-        listEl.innerHTML = `<div class="card"><p class="muted">В этом списке пока нет игр.</p></div>`;
-      } else {
-        for (const g of items) {
-          const achPart = g.total > 0 ? `${g.unlocked}/${g.total} ачивок` : "Без ачивок";
-          const row = document.createElement("div");
-          row.className = "game-item";
-          row.innerHTML = `
-            <img class="game-thumb" src="${g.icon_url}" alt="" onerror="this.style.display='none'" />
-            <div class="game-body">
-              <div class="game-name">${g.name}</div>
-              <div class="game-sub">${g.playtime_hours} ч · ${achPart}</div>
-            </div>
-            ${g.is_100 ? `<span class="tag-100">100%</span>` : ""}
-          `;
-          listEl.appendChild(row);
+      try {
+        const res = await fetch(`${API_URL}/api/sync/${tgUserId}`, { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) {
+          err.textContent = data.detail || "Не удалось обновить данные.";
+          err.classList.remove("hidden");
+          return;
         }
+        renderApp(data);
+      } catch {
+        err.textContent = "Ошибка сети при обновлении.";
+        err.classList.remove("hidden");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Обновить";
       }
-
-      document.getElementById("listContainer").classList.remove("hidden");
     }
 
-    (async function init() {
+    (async function bootstrap() {
       try {
         const res = await fetch(`${API_URL}/api/profile/${tgUserId}`);
         if (res.ok) {
           const data = await res.json();
-          renderProfile(data);
+          renderApp(data);
+          return;
         }
       } catch (_) {}
+
+      document.getElementById("loadingView").classList.add("hidden");
+      document.getElementById("linkView").classList.remove("hidden");
     })();
   </script>
 </body>
